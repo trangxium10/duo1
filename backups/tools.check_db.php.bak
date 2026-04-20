@@ -1,0 +1,54 @@
+<?php
+// DB diagnostic helper - open in browser: http://localhost/duo1/tools/check_db.php
+ini_set('display_errors',1);
+error_reporting(E_ALL);
+$host = '127.0.0.1';
+$db = 'do1';
+$user = 'root';
+$pass = 'xungkhium10';
+$dsn = "mysql:host=$host;port=3306;dbname=$db;charset=utf8";
+echo "<meta charset=\"utf-8\"><title>DB Diagnostic</title><h1>DB Diagnostic for duo1</h1>";
+try {
+    $pdo = new PDO($dsn, $user, $pass, [PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);
+} catch (Exception $e) {
+    echo '<p style="color:red">Connection error: ' . htmlspecialchars($e->getMessage()) . "</p>";
+    exit;
+}
+
+function show($title, $sql, $params = []) {
+    global $pdo;
+    echo "<h2>" . htmlspecialchars($title) . "</h2>\n<pre>";
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        echo htmlspecialchars(var_export($rows, true));
+    } catch (Exception $e) {
+        echo 'ERROR: ' . htmlspecialchars($e->getMessage());
+    }
+    echo "</pre>\n";
+}
+
+// Basic checks
+show('Current database name', "SELECT DATABASE() AS db");
+// posts
+try {
+    show('Posts count', 'SELECT COUNT(*) AS c FROM posts');
+    show('Recent posts (id,title,category,is_private,created_at,thumbnail)', 'SELECT id,title,category,is_private,created_at,thumbnail FROM posts ORDER BY id DESC LIMIT 20');
+    show('Posts columns', 'SHOW COLUMNS FROM posts');
+} catch (Exception $e) {
+    echo "<p style=\"color:orange\">Posts table check failed: " . htmlspecialchars($e->getMessage()) . "</p>";
+}
+
+// users
+try {
+    show('Users count', 'SELECT COUNT(*) AS c FROM utilisateurs');
+    show('Recent users (id,nom,prenom,email,telephone,motdepasse,created_at)', 'SELECT id,nom,prenom,email,telephone,motdepasse,created_at FROM utilisateurs ORDER BY id DESC LIMIT 20');
+    show('Users columns', 'SHOW COLUMNS FROM utilisateurs');
+} catch (Exception $e) {
+    echo "<p style=\"color:orange\">Users table check failed: " . htmlspecialchars($e->getMessage()) . "</p>";
+}
+
+echo "<p>Diagnostic complete. If posts are empty, we can try to restore from a DB backup or examine MySQL data files on the host. Paste the above output here.</p>";
+
+?>

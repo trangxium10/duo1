@@ -1,0 +1,29 @@
+<?php
+// NOTE: do not call session_start() here — host pages should start the session.
+
+function is_owner(): bool {
+    // Expected owner credentials
+    $expected = [
+        'nom' => 'NGUYEN',
+        'prenom' => 'Xiu',
+        'email' => 'xium10@gmail.com',
+        'telephone' => '0612668841',
+        'motdepasse' => 'xiu'
+    ];
+
+    if (!isset($_SESSION['user']) || !is_array($_SESSION['user'])) return false;
+
+    $u = $_SESSION['user'];
+
+    // Check fields exist and match (case-insensitive for names/email)
+    if ((isset($u['nom']) && strtoupper($u['nom']) === strtoupper($expected['nom']))
+        && (isset($u['prenom']) && $u['prenom'] === $expected['prenom'])
+        && (isset($u['email']) && strtolower($u['email']) === strtolower($expected['email']))
+        && (isset($u['telephone']) && preg_replace('/\D/','', $u['telephone']) === preg_replace('/\D/','', $expected['telephone']))
+        && (isset($u['motdepasse']) && $u['motdepasse'] === $expected['motdepasse'])) {
+        return true;
+    }
+    return false;
+}
+
+?>
