@@ -1,0 +1,20 @@
+# Prefer index.php over index.html
+DirectoryIndex index.php index.html
+
+# Redirect explicit requests for index.html to index.php to avoid duplicate content
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{THE_REQUEST} \s/index\.html [NC]
+    RewriteRule ^index\.html$ /index.php [R=301,L]
+</IfModule>
+
+# Recommended: disable aggressive caching for development
+<IfModule mod_headers.c>
+    <FilesMatch "\.(html|php)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+    </FilesMatch>
+    # Also disable caching for CSS/JS/Images during development so browsers refresh styles
+    <FilesMatch "\.(css|js|png|jpg|jpeg|gif|svg)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+    </FilesMatch>
+</IfModule>
