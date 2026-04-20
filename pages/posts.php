@@ -1,0 +1,186 @@
+<?php
+session_start();
+$host = '127.0.0.1';
+$db = 'do1';
+$user = 'root';
+$pass = 'xungkhium10';
+$dsn = "mysql:host=$host;port=3306;dbname=$db;charset=utf8";
+try {
+    $pdo = new PDO($dsn, $user, $pass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (Exception $e) {
+    die('Erreur : ' . $e->getMessage());
+}
+
+// Simple search and category filter
+$q = trim($_GET['q'] ?? '');
+$cat = $_GET['cat'] ?? '';
+
+// We'll fetch posts separately per category so we can show them in tabs
+$paramsBase = [];
+$like = '';
+if ($q !== '') {
+    $like = ' AND (p.title LIKE :q OR p.content LIKE :q)';
+    $paramsBase[':q'] = '%' . $q . '%';
+}
+
+$sqlLivres = 'SELECT p.*, u.nom as author_nom, u.prenom as author_prenom FROM posts p LEFT JOIN utilisateurs u ON p.user_id = u.id WHERE p.category = :cat' . $like . ' ORDER BY p.created_at DESC';
+$stmt1 = $pdo->prepare($sqlLivres);
+$params1 = array_merge($paramsBase, [':cat' => 'critiques']);
+$stmt1->execute($params1);
+$postsLivres = $stmt1->fetchAll(PDO::FETCH_ASSOC);
+
+$sqlLifestyle = 'SELECT p.*, u.nom as author_nom, u.prenom as author_prenom FROM posts p LEFT JOIN utilisateurs u ON p.user_id = u.id WHERE p.category = :cat' . $like . ' ORDER BY p.created_at DESC';
+$stmt2 = $pdo->prepare($sqlLifestyle);
+$params2 = array_merge($paramsBase, [':cat' => 'histoires']);
+$stmt2->execute($params2);
+$postsLifestyle = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="../css/style.css">
+    <title>Articles</title>
+</head>
+<body>
+<header><h1><span>DUO</span></h1></header>
+<nav>
+    <a href="../index.php">Accueil</a>
+    <a href="posts.php">Articles</a>
+    <?php
+        $__owner_email = 'xium10@gmail.com';
+        $__owner_nom = 'NGUYEN';
+        $__owner_prenom = 'Xiu';
+        if (isset($_SESSION['user'])
+            && isset($_SESSION['user']['email']) && strtolower($_SESSION['user']['email']) === strtolower($__owner_email)
+            && isset($_SESSION['user']['nom']) && strtoupper($_SESSION['user']['nom']) === strtoupper($__owner_nom)
+            && isset($_SESSION['user']['prenom']) && $_SESSION['user']['prenom'] === $__owner_prenom): ?>
+        <a href="create_post.php">Créer</a>
+    <?php endif; ?>
+    <a href="register.php">Mon espace</a>
+</nav>
+<main>
+    <div class="profil">
+        <h2>Articles</h2>
+        <form method="get" action="posts.php" style="margin-bottom:12px">
+            <input type="text" name="q" placeholder="Rechercher par titre..." value="<?php echo htmlspecialchars($q); ?>">
+            <select name="cat">
+                <option value="">Toutes catégories</option>
+                <option value="critiques" <?php if($cat==='critiques') echo 'selected'; ?>>Livres</option>
+                <option value="histoires" <?php if($cat==='histoires') echo 'selected'; ?>>Lifestyle</option>
+            </select>
+            <button class="btn-principal" type="submit">Rechercher</button>
+        </form>
+
+        <!-- Tabs -->
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+            <button id="tab-all" class="btn-principal" type="button">Toutes</button>
+            <button id="tab-livres" class="btn-principal" type="button">Livres</button>
+            <button id="tab-lifestyle" class="btn-principal" type="button">Lifestyle</button>
+        </div>
+
+        <!-- Content for Livres -->
+        <div id="section-livres">
+            <h3>Livres</h3>
+            <?php if (!$postsLivres): ?>
+                <p>Aucun article dans Livres.</p>
+            <?php else: ?>
+                <?php foreach($postsLivres as $p): ?>
+                    <?php
+                        $isPrivate = !empty($p['is_private']) && $p['is_private']==1;
+                        $thumb = !empty($p['thumbnail']) ? '../' . ltrim($p['thumbnail'], '/') : '';
+                        $link = ($isPrivate && !isset($_SESSION['user'])) ? 'register.php' : 'post.php?id=' . intval($p['id']);
+                    ?>
+                    <article style="border:1px solid #ccc;padding:12px;margin:10px 0;display:flex;gap:12px">
+                        <?php if($thumb): ?>
+                            <div style="width:140px;flex:0 0 140px;position:relative">
+                                <a href="<?php echo $link; ?>"><img src="<?php echo htmlspecialchars($thumb); ?>" alt="" style="width:100%;height:90px;object-fit:cover;border-radius:8px"></a>
+                                <?php if($isPrivate && !isset($_SESSION['user'])): ?>
+                                    <div style="position:absolute;left:8px;top:8px;background:rgba(0,0,0,0.6);color:#fff;padding:6px;border-radius:6px;font-weight:700">🔒 Privé</div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+                        <div style="flex:1">
+                            <h3 style="display:flex;align-items:center;gap:12px">
+                                <a href="<?php echo $link; ?>"><?php echo htmlspecialchars($p['title']); ?></a>
+                                <?php if (isset($_SESSION['user']) && isset($_SESSION['user']['id']) && $_SESSION['user']['id'] == $p['user_id']): ?>
+                                    <a class="link-action" href="edit_post.php?id=<?php echo intval($p['id']); ?>">Modifier</a>
+                                    <form method="post" action="delete_post.php" style="display:inline;margin-left:8px">
+                                        <input type="hidden" name="id" value="<?php echo intval($p['id']); ?>">
+                                        <input type="hidden" name="return" value="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>">
+                                        <button type="submit" class="link-action link-delete" onclick="return confirm('Supprimer cet article ?');">Supprimer</button>
+                                    </form>
+                                <?php endif; ?>
+                            </h3>
+                            <div style="font-size:0.9em;color:#666">Par <?php echo htmlspecialchars($p['author_prenom'] ?: $p['author_nom']); ?> — <?php echo htmlspecialchars($p['created_at']); ?> — Cat: Livres</div>
+                            <p><?php echo nl2br(htmlspecialchars(substr($p['content'],0,300))); ?><?php if(strlen($p['content'])>300) echo '...'; ?></p>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+
+        <!-- Content for Lifestyle -->
+        <div id="section-lifestyle" style="display:none">
+            <h3>Lifestyle</h3>
+            <?php if (!$postsLifestyle): ?>
+                <p>Aucun article dans Lifestyle.</p>
+            <?php else: ?>
+                <?php foreach($postsLifestyle as $p): ?>
+                    <?php
+                        $isPrivate = !empty($p['is_private']) && $p['is_private']==1;
+                        $thumb = !empty($p['thumbnail']) ? '../' . ltrim($p['thumbnail'], '/') : '';
+                        $link = ($isPrivate && !isset($_SESSION['user'])) ? 'register.php' : 'post.php?id=' . intval($p['id']);
+                    ?>
+                    <article style="border:1px solid #ccc;padding:12px;margin:10px 0;display:flex;gap:12px">
+                        <?php if($thumb): ?>
+                            <div style="width:140px;flex:0 0 140px;position:relative">
+                                <a href="<?php echo $link; ?>"><img src="<?php echo htmlspecialchars($thumb); ?>" alt="" style="width:100%;height:90px;object-fit:cover;border-radius:8px"></a>
+                                <?php if($isPrivate && !isset($_SESSION['user'])): ?>
+                                    <div style="position:absolute;left:8px;top:8px;background:rgba(0,0,0,0.6);color:#fff;padding:6px;border-radius:6px;font-weight:700">🔒 Privé</div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+                        <div style="flex:1">
+                            <h3><a href="<?php echo $link; ?>"><?php echo htmlspecialchars($p['title']); ?></a></h3>
+                            <div style="font-size:0.9em;color:#666">Par <?php echo htmlspecialchars($p['author_prenom'] ?: $p['author_nom']); ?> — <?php echo htmlspecialchars($p['created_at']); ?> — Cat: Lifestyle</div>
+                            <p><?php echo nl2br(htmlspecialchars(substr($p['content'],0,300))); ?><?php if(strlen($p['content'])>300) echo '...'; ?></p>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+
+        <script>
+        // Simple tab behavior
+        const tabAll = document.getElementById('tab-all');
+        const tabLivres = document.getElementById('tab-livres');
+        const tabLifestyle = document.getElementById('tab-lifestyle');
+        const secLivres = document.getElementById('section-livres');
+        const secLifestyle = document.getElementById('section-lifestyle');
+
+        function showAll(){ secLivres.style.display='block'; secLifestyle.style.display='block'; }
+        function showLivres(){ secLivres.style.display='block'; secLifestyle.style.display='none'; }
+        function showLifestyle(){ secLivres.style.display='none'; secLifestyle.style.display='block'; }
+
+        tabAll.addEventListener('click', showAll);
+        tabLivres.addEventListener('click', showLivres);
+        tabLifestyle.addEventListener('click', showLifestyle);
+
+        // Initialize based on ?cat param
+        (function(){
+            const urlParams = new URLSearchParams(window.location.search);
+            const cat = urlParams.get('cat');
+            if(cat === 'critiques') showLivres();
+            else if(cat === 'histoires') showLifestyle();
+            else showAll();
+        })();
+        </script>
+
+    </div>
+</main>
+<footer><p style="color:#fff">2026 DUO</p></footer>
+</body>
+</html>
