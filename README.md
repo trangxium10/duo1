@@ -3,8 +3,8 @@
 Bienvenue sur le dépôt du projet **DUO**, un blog personnel conçu pour offrir une « *safe place* » aux étudiants étrangers souhaitant étudier en France. 
 
 Ce projet a été réalisé dans le cadre de l'UE "Programmation Web et Introduction PHP" (Licence 2 MIASHS parcours MIAGE à l'Université Paris Nanterre) par :
-- **Kissiedou Tyra**
-- **Nguyen Thi Hoang Trang**
+- ** Tyra**
+- ** Thi Hoang Trang**
 
 ## 🌟 Concept
 DUO est une plateforme permettant de partager des expériences, des histoires de vie (*lifestyle*) et des coups de cœur littéraires. L'objectif est de créer un espace bienveillant, ressourçant et riche en conseils pratiques pour aiguiller les étudiants à travers les défis émotionnels et logistiques de la vie étudiante dans un nouveau pays.
