@@ -28,4 +28,4 @@ Le site a été développé avec une approche dynamique reposant sur :
 4. Accédez au site via `http://localhost/duo1/index.php`.
 
 ---
-*Projet réalisé avec passion en Décembre 2025.*
+
