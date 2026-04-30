@@ -1,0 +1,208 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{array}
+\geometry{margin=2.5cm}
+
+\title{Rapport de Projet \\ Mini Site E-commerce}
+\author{Nom Prénom \\ L2 ....}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+%--------------------------------------------------
+\section{Introduction}
+
+Dans ce projet, nous avons réalisé un mini site e-commerce permettant de gérer des produits en ligne.
+
+L’objectif est de développer un site web dynamique en utilisant :
+\begin{itemize}
+    \item PHP
+    \item MySQL
+    \item HTML / CSS / JavaScript
+\end{itemize}
+
+%--------------------------------------------------
+\section{Présentation du site}
+
+Le site permet d’afficher une liste de produits et de les gérer.
+
+Un utilisateur peut consulter les produits, tandis qu’un administrateur peut :
+\begin{itemize}
+    \item Ajouter un produit
+    \item Modifier un produit
+    \item Supprimer un produit
+\end{itemize}
+
+%--------------------------------------------------
+\section{Fonctionnalités}
+
+Les principales fonctionnalités du site sont :
+
+\begin{itemize}
+    \item Affichage des produits (SELECT)
+    \item Ajout d’un produit (INSERT)
+    \item Modification d’un produit (UPDATE)
+    \item Suppression d’un produit (DELETE)
+\end{itemize}
+
+%--------------------------------------------------
+\section{Conception}
+
+\subsection{Diagramme de cas d’utilisation}
+
+\textbf{Acteurs :}
+\begin{itemize}
+    \item Utilisateur
+    \item Administrateur
+\end{itemize}
+
+\textbf{Cas d’utilisation :}
+\begin{itemize}
+    \item Consulter les produits
+    \item Ajouter un produit
+    \item Modifier un produit
+    \item Supprimer un produit
+\end{itemize}
+
+\includegraphics[width=\textwidth]{usecase.png}
+
+%--------------------------------------------------
+\subsection{Diagramme de classe}
+
+Classe principale : \textbf{Produit}
+
+\begin{tabular}{|c|c|}
+\hline
+Attribut & Type \\
+\hline
+id & int \\
+nom & varchar \\
+prix & float \\
+description & text \\
+\hline
+\end{tabular}
+
+Cette classe correspond à la table produits dans la base de données.
+
+\includegraphics[width=\textwidth]{classe.png}
+
+%--------------------------------------------------
+\subsection{Diagramme de séquence}
+
+Exemple : ajout d’un produit
+
+\begin{enumerate}
+    \item L’utilisateur remplit le formulaire
+    \item Le navigateur envoie les données au serveur
+    \item Le script PHP traite les données
+    \item Une requête SQL (INSERT) est exécutée
+    \item Les données sont enregistrées dans la base
+\end{enumerate}
+
+\includegraphics[width=\textwidth]{sequence.png}
+
+%--------------------------------------------------
+\section{Base de données}
+
+Nous avons créé une base de données appelée \textbf{ecommerce}.
+
+\subsection{Table produits}
+
+\begin{tabular}{|c|c|c|}
+\hline
+Champ & Type & Description \\
+\hline
+id & INT & Identifiant \\
+nom & VARCHAR & Nom du produit \\
+prix & FLOAT & Prix \\
+description & TEXT & Description \\
+\hline
+\end{tabular}
+
+\subsection{Requête SQL}
+
+\begin{verbatim}
+CREATE TABLE produits (
+id INT AUTO_INCREMENT PRIMARY KEY,
+nom VARCHAR(100),
+prix FLOAT,
+description TEXT
+);
+\end{verbatim}
+
+%--------------------------------------------------
+\section{Réalisation}
+
+\subsection{Connexion à la base de données}
+
+La connexion à la base de données est réalisée avec PHP et MySQL.
+
+\subsection{Développement}
+
+Nous avons développé les fonctionnalités suivantes :
+\begin{itemize}
+    \item Affichage des produits avec PHP
+    \item Formulaire d’ajout
+    \item Modification des données
+    \item Suppression des données
+\end{itemize}
+
+\subsection{Structure du projet}
+
+\begin{verbatim}
+/ecommerce
+    index.php
+    connexion.php
+    style.css
+\end{verbatim}
+
+%--------------------------------------------------
+\section{Interface du site}
+
+Le site contient :
+\begin{itemize}
+    \item Une page principale affichant les produits
+    \item Un formulaire pour ajouter un produit
+    \item Des boutons pour modifier et supprimer
+\end{itemize}
+
+\includegraphics[width=\textwidth]{capture1.png}
+
+%--------------------------------------------------
+\section{Difficultés rencontrées}
+
+Nous avons rencontré plusieurs difficultés :
+\begin{itemize}
+    \item Connexion à la base de données
+    \item Erreurs dans les requêtes SQL
+    \item Gestion des formulaires PHP
+\end{itemize}
+
+%--------------------------------------------------
+\section{Conclusion}
+
+Ce projet nous a permis de comprendre :
+\begin{itemize}
+    \item Le fonctionnement d’un site web dynamique
+    \item La connexion entre PHP et MySQL
+    \item Les opérations CRUD
+\end{itemize}
+
+\subsection{Améliorations possibles}
+
+\begin{itemize}
+    \item Ajouter un système de connexion utilisateur
+    \item Améliorer le design
+    \item Ajouter une recherche
+\end{itemize}
+\section{Bibliographie }
+\end{document}

@@ -19,7 +19,7 @@ if (!isset($_SESSION['user'])
 $host = '127.0.0.1';
 $db = 'do1';
 $user = 'root';
-$pass = 'xungkhium10';
+$pass = '';
 $dsn = "mysql:host=$host;port=3306;dbname=$db;charset=utf8";
 try {
     $pdo = new PDO($dsn, $user, $pass);
